@@ -1,2 +1,2 @@
-def handler(request):
+﻿def handler(request):
     return ("pong", 200)
