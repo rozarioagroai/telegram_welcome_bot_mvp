@@ -1,0 +1,22 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "numReplicas": 1,
+    "restartPolicyType": "ON_FAILURE",
+    "healthcheckPath": "/",
+    "sleepApplication": false
+  },
+  "variables": {
+    "USE_WEBHOOK": {
+      "description": "Use webhook mode (true/false)",
+      "value": "false"
+    },
+    "PORT": {
+      "description": "Port for webhook server",
+      "value": "8000"
+    }
+  }
+}
