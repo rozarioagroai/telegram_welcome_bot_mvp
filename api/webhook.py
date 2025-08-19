@@ -1,50 +1,28 @@
-# Vercel Python Serverless Function entrypoint
-# Обрабатывает Telegram webhook и передаёт апдейты в PTB Application
-
-import os
-import json
 import asyncio
-from typing import Any
+from starlette.applications import Starlette
+from starlette.responses import PlainTextResponse
+from starlette.routing import Route
+from starlette.requests import Request
 from telegram import Update
-from telegram.error import TelegramError
-
-# наша сборка приложения (регистрирует хэндлеры, подключает БД и т.п.)
 from src.bot_app import build_app
-from src.config import settings
 
-# Создаём глобально, чтобы между вызовами не пересоздавать
-_app_init_lock = asyncio.Lock()
-_app: Any = None
-_loop = asyncio.new_event_loop()
-asyncio.set_event_loop(_loop)
+_app = None
+_loop = asyncio.get_event_loop_policy().new_event_loop()
 
-async def _ensure_app() -> Any:
+async def ensure_app():
     global _app
     if _app is None:
         _app = await build_app()
         await _app.initialize()
     return _app
 
-def handler(request):
-    # Telegram шлёт JSON в POST
+async def webhook(request: Request):
     if request.method != "POST":
-        return ("OK", 200)
+        return PlainTextResponse("OK")
+    data = await request.json()
+    app = await ensure_app()
+    update = Update.de_json(data, app.bot)
+    await app.process_update(update)
+    return PlainTextResponse("OK")
 
-    try:
-        data = request.get_json(force=True, silent=False)
-    except Exception:
-        return ("bad request", 400)
-
-    async def _process():
-        app = await _ensure_app()
-        update = Update.de_json(data, app.bot)
-        try:
-            await app.process_update(update)
-        except TelegramError:
-            # не роняем функцию из-за API ошибок
-            pass
-        return "OK"
-
-    # Выполняем в нашем loop
-    result = _loop.run_until_complete(_process())
-    return (result, 200)
+app = Starlette(routes=[Route("/", webhook, methods=["GET", "POST"])])
