@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     PORT: int = 8000
 
     DB_PATH: str = Field(default="bot.db")
+    DATABASE_URL: str | None = None
 
     # NEW: comma/semicolon separated list of admin user_ids
     ADMIN_IDS: list[int] = Field(default_factory=list)
