@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Telegram Bot для Koyeb - Polling режим
+Telegram Bot для Koyeb - Упрощенная версия
 """
 import os
 import sys
 import asyncio
 import logging
+import threading
+import time
 from pathlib import Path
 
 # Добавляем путь к src для импорта модулей
@@ -83,50 +85,59 @@ def build_app() -> Application:
 
     return app
 
-async def main():
-    """Главная функция"""
+def run_polling():
+    """Запуск polling в отдельном потоке"""
     try:
-        app = build_app()
-        logger.info("Starting bot in polling mode...")
+        # Создаем новый event loop для этого потока
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         
-        # Запускаем в polling режиме
-        await app.initialize()
-        await app.start()
-        await app.run_polling(allowed_updates=Update.ALL_TYPES)
+        async def run():
+            try:
+                app = build_app()
+                logger.info("Starting bot in polling mode...")
+                
+                await app.initialize()
+                await app.start()
+                await app.run_polling(allowed_updates=Update.ALL_TYPES)
+                
+            except Exception as e:
+                logger.error(f"Error in polling: {e}")
+            finally:
+                try:
+                    await app.stop()
+                    await app.shutdown()
+                except:
+                    pass
         
-    except KeyboardInterrupt:
-        logger.info("Bot stopped by user")
+        # Запускаем в этом loop
+        loop.run_until_complete(run())
+        
     except Exception as e:
-        logger.error(f"Error running bot: {e}")
-        sys.exit(1)
-    finally:
-        try:
-            await app.stop()
-            await app.shutdown()
-        except:
-            pass
+        logger.error(f"Error in polling thread: {e}")
 
-def run_bot():
-    """Запуск бота с правильным event loop"""
+def start_bot():
+    """Запуск бота без конфликтующих event loop"""
     try:
-        # Проверяем, есть ли уже запущенный event loop
+        logger.info("Starting bot in background thread...")
+        
+        # Запускаем в отдельном потоке
+        bot_thread = threading.Thread(target=run_polling, daemon=True)
+        bot_thread.start()
+        
+        logger.info("Bot started successfully in background thread")
+        
+        # Держим основной поток живым
         try:
-            loop = asyncio.get_running_loop()
-            # Если loop уже запущен, создаем задачу
-            if loop.is_running():
-                logger.info("Event loop already running, creating task")
-                loop.create_task(main())
-                return
-        except RuntimeError:
-            pass
-        
-        # Если нет запущенного loop, запускаем новый
-        asyncio.run(main())
-        
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logger.info("Shutting down...")
+            
     except Exception as e:
-        logger.error(f"Error in run_bot: {e}")
+        logger.error(f"Error starting bot: {e}")
         sys.exit(1)
 
 if __name__ == "__main__":
     # Запускаем бота
-    run_bot()
+    start_bot()
