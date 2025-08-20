@@ -99,7 +99,17 @@ def run_polling():
                 
                 await app.initialize()
                 await app.start()
-                await app.run_polling(allowed_updates=Update.ALL_TYPES)
+                
+                # Простой polling без signal handling
+                while True:
+                    try:
+                        updates = await app.updater.bot.get_updates()
+                        for update in updates:
+                            await app.process_update(update)
+                        await asyncio.sleep(1)  # Пауза между проверками
+                    except Exception as e:
+                        logger.error(f"Error processing updates: {e}")
+                        await asyncio.sleep(5)  # Пауза при ошибке
                 
             except Exception as e:
                 logger.error(f"Error in polling: {e}")
