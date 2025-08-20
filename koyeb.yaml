@@ -1,0 +1,24 @@
+name: telegram-welcome-bot
+service:
+  type: web
+  ports:
+    - port: 8080
+      protocol: http
+  routes:
+    - path: /
+      protocol: http
+  env:
+    - name: BOT_TOKEN
+      value: "YOUR_BOT_TOKEN_HERE"
+    - name: CHANNEL_USERNAME
+      value: "YOUR_CHANNEL_USERNAME"
+    - name: CHECKLIST_URL
+      value: "YOUR_CHECKLIST_URL"
+    - name: LOG_LEVEL
+      value: "INFO"
+    - name: USE_WEBHOOK
+      value: "false"
+  docker:
+    image: your-dockerhub-username/telegram-welcome-bot:latest
+    # Или используйте GitHub Container Registry
+    # image: ghcr.io/your-username/telegram-welcome-bot:latest
