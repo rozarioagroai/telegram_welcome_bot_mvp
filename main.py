@@ -106,6 +106,27 @@ async def main():
         except:
             pass
 
+def run_bot():
+    """Запуск бота с правильным event loop"""
+    try:
+        # Проверяем, есть ли уже запущенный event loop
+        try:
+            loop = asyncio.get_running_loop()
+            # Если loop уже запущен, создаем задачу
+            if loop.is_running():
+                logger.info("Event loop already running, creating task")
+                loop.create_task(main())
+                return
+        except RuntimeError:
+            pass
+        
+        # Если нет запущенного loop, запускаем новый
+        asyncio.run(main())
+        
+    except Exception as e:
+        logger.error(f"Error in run_bot: {e}")
+        sys.exit(1)
+
 if __name__ == "__main__":
     # Запускаем бота
-    asyncio.run(main())
+    run_bot()
