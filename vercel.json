@@ -2,27 +2,13 @@
   "version": 2,
   "functions": {
     "api/ping.py": {
-      "runtime": "python3.12"
+      "runtime": "@vercel/python@3.1.0"
     },
     "api/webhook.py": {
-      "runtime": "python3.12"
+      "runtime": "@vercel/python@3.1.0"
     },
     "api/test.py": {
-      "runtime": "python3.12"
+      "runtime": "@vercel/python@3.1.0"
     }
-  },
-  "routes": [
-    {
-      "src": "/api/ping",
-      "dest": "/api/ping.py"
-    },
-    {
-      "src": "/api/webhook",
-      "dest": "/api/webhook.py"
-    },
-    {
-      "src": "/api/test",
-      "dest": "/api/test.py"
-    }
-  ]
+  }
 }
