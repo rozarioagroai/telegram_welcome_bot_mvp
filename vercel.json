@@ -1,0 +1,28 @@
+{
+  "version": 2,
+  "functions": {
+    "api/ping.py": {
+      "runtime": "python3.12"
+    },
+    "api/webhook.py": {
+      "runtime": "python3.12"
+    },
+    "api/test.py": {
+      "runtime": "python3.12"
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/ping",
+      "dest": "/api/ping.py"
+    },
+    {
+      "src": "/api/webhook",
+      "dest": "/api/webhook.py"
+    },
+    {
+      "src": "/api/test",
+      "dest": "/api/test.py"
+    }
+  ]
+}
