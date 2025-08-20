@@ -1,2 +1,7 @@
-# Минимальные зависимости для тестирования
+# Зависимости для Telegram бота
+psycopg[binary,pool]==3.2.1
+pydantic>=2.6.0
+pydantic-settings>=2.2.1
+python-dotenv>=1.0.1
+pytest>=7.4.4
 python-telegram-bot==21.4
