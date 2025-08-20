@@ -9,11 +9,11 @@ service:
       protocol: http
   env:
     - name: BOT_TOKEN
-      value: "YOUR_BOT_TOKEN_HERE"
+      value: "8029138825:AAElqpWRsKcXdHzsW2gncGOilr7VPxeJcfM"
     - name: CHANNEL_USERNAME
-      value: "YOUR_CHANNEL_USERNAME"
+      value: "@your_channel_username"
     - name: CHECKLIST_URL
-      value: "YOUR_CHECKLIST_URL"
+      value: "https://your-checklist-url.com"
     - name: LOG_LEVEL
       value: "INFO"
     - name: USE_WEBHOOK
