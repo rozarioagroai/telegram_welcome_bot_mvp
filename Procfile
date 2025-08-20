@@ -1,2 +1,2 @@
-worker: python -m src.bot_app
-web: python -m src.bot_app
+worker: python main.py
+web: python main.py
