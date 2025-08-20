@@ -1,10 +1,11 @@
-from starlette.applications import Starlette
-from starlette.responses import JSONResponse
-from starlette.routing import Route
+from flask import Flask, jsonify
 import os
 
-async def test(request):
-    return JSONResponse({
+app = Flask(__name__)
+
+@app.route('/')
+def test():
+    return jsonify({
         "status": "ok",
         "message": "Test endpoint working",
         "environment": os.getenv("VERCEL_ENV", "development"),
@@ -12,4 +13,5 @@ async def test(request):
         "timestamp": "2025-08-19T20:30:00Z"
     })
 
-app = Starlette(routes=[Route("/", test, methods=["GET"])])
+if __name__ == '__main__':
+    app.run()

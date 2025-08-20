@@ -4,5 +4,6 @@ pydantic-settings>=2.2.1
 python-dotenv>=1.0.1
 pytest>=7.4.4
 starlette==0.37.2
+Flask==3.0.3
 python-telegram-bot==21.4
 werkzeug>=2.0.0

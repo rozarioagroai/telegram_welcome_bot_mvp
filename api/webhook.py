@@ -1,44 +1,44 @@
 import os, asyncio
-from starlette.applications import Starlette
-from starlette.responses import PlainTextResponse, JSONResponse
-from starlette.routing import Route
-from starlette.requests import Request
+from flask import Flask, request, jsonify
 from telegram import Update
-from src.bot_app import build_app  # ваш сборщик PTB-приложения
+from src.bot_app import build_app
 
-_app = None
-_init_lock = asyncio.Lock()  # защитим одноразовую инициализацию
+app = Flask(__name__)
 
-async def ensure_app():
-    global _app
-    if _app is None:
-        async with _init_lock:
-            if _app is None:
-                _app = await build_app()
-                await _app.initialize()
-    return _app
+_ptb_app = None
 
-async def webhook(request: Request):
-    # GET — удобный health-check (браузером увидите "ok")
-    if request.method != "POST":
-        return PlainTextResponse("ok")
+async def ensure_ptb_app():
+    global _ptb_app
+    if _ptb_app is None:
+        _ptb_app = await build_app()
+        await _ptb_app.initialize()
+    return _ptb_app
 
-    # Telegram присылает JSON c Update
+@app.route('/', methods=['GET', 'POST'])
+def webhook():
+    # GET — удобный health-check
+    if request.method == 'GET':
+        return "ok"
+    
+    # POST — обработка webhook от Telegram
     try:
-        data = await request.json()
+        data = request.get_json(force=True, silent=True) or {}
     except Exception:
-        return JSONResponse({"ok": False, "error": "invalid json"}, status_code=400)
+        return jsonify({"ok": False, "error": "invalid json"}), 400
 
-    app = await ensure_app()
-
-    # (необязательно) проверка секретного токена вебхука
+    # Проверка секретного токена вебхука
     secret = os.getenv("TG_SECRET_TOKEN")
     if secret and request.headers.get("X-Telegram-Bot-Api-Secret-Token") != secret:
-        return JSONResponse({"ok": False}, status_code=403)
+        return jsonify({"ok": False}), 403
 
-    update = Update.de_json(data, app.bot)
-    await app.process_update(update)
-    return JSONResponse({"ok": True})
+    # Обработка update
+    try:
+        ptb_app = asyncio.run(ensure_ptb_app())
+        update = Update.de_json(data, ptb_app.bot)
+        asyncio.run(ptb_app.process_update(update))
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)}), 500
 
-# Внутри Starlette маршрут — корень "/", снаружи Vercel добавит "/api/webhook"
-app = Starlette(routes=[Route("/", webhook, methods=["GET", "POST"])])
+if __name__ == '__main__':
+    app.run()
