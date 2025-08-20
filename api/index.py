@@ -1,42 +1,30 @@
-from flask import Flask, request, jsonify
+# Максимально простая функция для Vercel
+from http.server import BaseHTTPRequestHandler
+import json
 import os
 
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    return jsonify({
-        "status": "ok",
-        "message": "Telegram Bot API is running",
-        "environment": os.getenv("VERCEL_ENV", "development"),
-        "bot_token_set": bool(os.getenv("BOT_TOKEN")),
-        "endpoints": ["/ping", "/webhook", "/test"]
-    })
-
-@app.route('/ping')
-def ping():
-    return jsonify({
-        "status": "ok",
-        "message": "pong",
-        "environment": os.getenv("VERCEL_ENV", "development")
-    })
-
-@app.route('/test')
-def test():
-    return jsonify({
-        "status": "ok",
-        "message": "Test endpoint working",
-        "environment": os.getenv("VERCEL_ENV", "development"),
-        "bot_token_set": bool(os.getenv("BOT_TOKEN"))
-    })
-
-@app.route('/webhook', methods=['GET', 'POST'])
-def webhook():
-    if request.method == 'GET':
-        return "ok"
+class handler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        
+        response = {
+            "status": "ok",
+            "message": "Telegram Bot API is working!",
+            "environment": os.getenv("VERCEL_ENV", "development"),
+            "bot_token_set": bool(os.getenv("BOT_TOKEN")),
+            "path": self.path
+        }
+        
+        self.wfile.write(json.dumps(response).encode())
+        return
     
-    # POST обработка будет добавлена позже
-    return jsonify({"ok": True})
-
-if __name__ == '__main__':
-    app.run()
+    def do_POST(self):
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        
+        response = {"ok": True, "message": "POST received"}
+        self.wfile.write(json.dumps(response).encode())
+        return
