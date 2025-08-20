@@ -12,6 +12,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent / "src"))
 
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, CallbackQueryHandler
+from telegram import Update
 from src.config import settings
 from src.logging_setup import setup_logging
 from src.db import Database
@@ -22,7 +23,6 @@ from src.handlers.callbacks import captcha_ok_handler, enter_data_handler
 from src.handlers.data import user_data_message_handler
 from src.handlers.admin_actions import admin_approve_handler, admin_deny_handler
 from src.services.throttling import Throttler
-from telegram.update import Update
 
 # Настройка логирования
 logging.basicConfig(
