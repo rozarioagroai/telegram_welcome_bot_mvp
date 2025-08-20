@@ -49,17 +49,39 @@ async def configure_channel_id(app: Application, db: Database) -> None:
 async def post_init(app: Application) -> None:
     """Инициализация после создания приложения"""
     try:
+        logger.info("Starting post_init...")
+        
+        # Проверяем настройки
+        logger.info(f"DB_PATH: {settings.DB_PATH}")
+        logger.info(f"BOT_TOKEN: {'SET' if settings.BOT_TOKEN else 'NOT SET'}")
+        
+        # Создаем базу данных
         db = Database(settings.DB_PATH)
+        logger.info("Database object created")
+        
         await db.connect()
+        logger.info("Database connected")
+        
         await db.migrate()
+        logger.info("Database migrated")
+        
+        # Сохраняем в bot_data
         app.bot_data["db"] = db
         app.bot_data["throttler"] = Throttler()
         app.bot_data["captcha_deadlines"] = {}
         app.bot_data["awaiting_data"] = set()
+        
+        logger.info(f"bot_data keys: {list(app.bot_data.keys())}")
+        logger.info(f"db in bot_data: {'db' in app.bot_data}")
+        
         await configure_channel_id(app, db)
         logger.info("Bot initialized successfully")
+        
     except Exception as e:
         logger.error(f"Error during initialization: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
+        raise  # Перебрасываем ошибку для диагностики
 
 def build_app() -> Application:
     """Создание и настройка приложения"""
@@ -94,14 +116,26 @@ def run_polling():
         
         async def run():
             try:
+                logger.info("Building app...")
                 app = build_app()
+                logger.info("App built successfully")
+                
                 logger.info("Starting bot in polling mode...")
                 
                 # ВАЖНО: Вызываем post_init вручную
+                logger.info("Calling post_init...")
                 await post_init(app)
+                logger.info("post_init completed")
+                
+                # Проверяем bot_data после post_init
+                logger.info(f"bot_data after post_init: {list(app.bot_data.keys())}")
+                logger.info(f"db in bot_data: {'db' in app.bot_data}")
                 
                 await app.initialize()
+                logger.info("App initialized")
+                
                 await app.start()
+                logger.info("App started")
                 
                 # Простой polling без signal handling
                 while True:
@@ -116,6 +150,8 @@ def run_polling():
                 
             except Exception as e:
                 logger.error(f"Error in polling: {e}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
             finally:
                 try:
                     await app.stop()
