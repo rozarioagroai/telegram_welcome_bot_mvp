@@ -17,7 +17,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from telegram import Update
 from src.config import settings
 from src.logging_setup import setup_logging
-from src.db import Database
+from src.db_sqlite import Database
 from src.handlers.start import start_handler
 from src.handlers.access import getaccess_handler
 from src.handlers.help import help_handler

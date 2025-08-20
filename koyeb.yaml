@@ -9,7 +9,7 @@ service:
       protocol: http
   env:
     - name: BOT_TOKEN
-      value: "8029138825:AAElqpWRsKcXdHzsW2gncGOilr7VPxeJcfM"
+      value: "НОВЫЙ_ТОКЕН_БОТА"
     - name: CHANNEL_USERNAME
       value: "@your_channel_username"
     - name: CHECKLIST_URL
