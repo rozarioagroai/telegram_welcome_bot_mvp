@@ -97,6 +97,9 @@ def run_polling():
                 app = build_app()
                 logger.info("Starting bot in polling mode...")
                 
+                # ВАЖНО: Вызываем post_init вручную
+                await post_init(app)
+                
                 await app.initialize()
                 await app.start()
                 
