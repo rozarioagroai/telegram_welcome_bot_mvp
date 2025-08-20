@@ -189,6 +189,19 @@ class Database:
             
         await asyncio.get_event_loop().run_in_executor(None, _set_source)
 
+    async def get_user_source(self, user_id: int) -> Optional[str]:
+        """Получаем источник пользователя"""
+        def _get_source():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            
+            cur.execute("SELECT value FROM kv WHERE key=?", (f"user_source_{user_id}",))
+            row = cur.fetchone()
+            conn.close()
+            return row[0] if row else None
+            
+        return await asyncio.get_event_loop().run_in_executor(None, _get_source)
+
     async def get_kv(self, key: str) -> Optional[str]:
         """Получаем значение по ключу"""
         def _get():
