@@ -137,12 +137,17 @@ def run_polling():
                 await app.start()
                 logger.info("App started")
                 
-                # Простой polling без signal handling
+                # Правильный polling с offset
+                offset = 0
                 while True:
                     try:
-                        updates = await app.updater.bot.get_updates()
-                        for update in updates:
-                            await app.process_update(update)
+                        updates = await app.updater.bot.get_updates(offset=offset, timeout=30)
+                        if updates:
+                            for update in updates:
+                                await app.process_update(update)
+                                # Обновляем offset на следующий update_id + 1
+                                offset = update.update_id + 1
+                            logger.info(f"Processed {len(updates)} updates, new offset: {offset}")
                         await asyncio.sleep(1)  # Пауза между проверками
                     except Exception as e:
                         logger.error(f"Error processing updates: {e}")
