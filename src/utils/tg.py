@@ -40,3 +40,7 @@ def build_ref_utm(base_url: str, campaign: str, source: str) -> str:
         "utm_content": source,
     }
     return f"{base_url}?{urlencode(params)}"
+
+def welcome_keyboard() -> InlineKeyboardMarkup:
+    kb = [[InlineKeyboardButton(text="Get Access to Private Channel", callback_data="start_access")]]
+    return InlineKeyboardMarkup(kb)

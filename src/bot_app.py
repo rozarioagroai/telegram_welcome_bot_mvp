@@ -10,7 +10,9 @@ from .config import settings
 from .logging_setup import setup_logging
 from .db_sqlite import Database
 from .handlers.start import start_handler
+from .handlers.welcome import welcome_handler
 from .handlers.access import getaccess_handler
+from .handlers.access_button import start_access_handler
 from .handlers.help import help_handler
 from .handlers.callbacks import captcha_ok_handler, enter_data_handler
 from .handlers.data import user_data_message_handler
@@ -44,7 +46,8 @@ def build_app() -> Application:
     setup_logging()
     app = Application.builder().token(settings.BOT_TOKEN).post_init(post_init).build()
 
-    app.add_handler(CommandHandler("start", start_handler))
+    app.add_handler(CommandHandler("start", welcome_handler))  # Заменяем start на welcome
+    app.add_handler(CallbackQueryHandler(start_access_handler, pattern="^start_access$"))
     app.add_handler(CallbackQueryHandler(captcha_ok_handler, pattern="^captcha_ok$"))
     app.add_handler(CallbackQueryHandler(enter_data_handler, pattern="^enter_data$"))
     app.add_handler(CallbackQueryHandler(admin_approve_handler, pattern=r"^admin_approve:\d+$"))
