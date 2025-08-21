@@ -18,7 +18,7 @@ service:
       value: "INFO"
     - name: USE_WEBHOOK
       value: "false"
-  docker:
-    image: your-dockerhub-username/telegram-welcome-bot:latest
-    # Или используйте GitHub Container Registry
-    # image: ghcr.io/your-username/telegram-welcome-bot:latest
+  build:
+    builder: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
