@@ -19,4 +19,17 @@ def extract_email_and_username(text: str) -> Tuple[Optional[str], Optional[str]]
     logger = logging.getLogger("gatebot")
     logger.info(f"Parsing text: '{text}' -> email: {email}, username: {username}")
     
+    # Additional validation: make sure username is not part of email
+    if email and username:
+        # If username appears to be part of email domain, try to find another @username
+        if username.lower() in email.lower():
+            # Look for another @username that's not part of the email
+            all_matches = USERNAME_RE.findall(text)
+            for match in all_matches:
+                potential_username = f"@{match}"
+                if potential_username.lower() not in email.lower():
+                    username = potential_username
+                    logger.info(f"Found alternative username: {username}")
+                    break
+    
     return email, username
