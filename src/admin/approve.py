@@ -4,7 +4,7 @@ import logging
 from telegram import Bot, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.error import TelegramError
 from ..config import settings
-from ..db import Database
+from ..db_sqlite import Database
 from ..services.invites import create_one_time_invite
 
 logging.basicConfig(level=logging.INFO, format="[%(levelname)s] %(asctime)s %(message)s")

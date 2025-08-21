@@ -2,6 +2,9 @@
 __pycache__/
 *.pyc
 .env
-bot.db
+bot.db*
 *.log
 .DS_Store
+.idea/
+*.db-wal
+*.db-shm

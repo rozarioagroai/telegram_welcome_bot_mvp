@@ -2,7 +2,7 @@ import time
 from datetime import datetime, timedelta
 from telegram import Bot
 from telegram.error import TelegramError
-from ..db import Database
+from ..db_sqlite import Database
 
 async def create_one_time_invite(
     bot: Bot,

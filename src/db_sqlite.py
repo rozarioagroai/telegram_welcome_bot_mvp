@@ -230,3 +230,81 @@ class Database:
             conn.close()
             
         await asyncio.get_event_loop().run_in_executor(None, _set)
+
+    async def insert_submission(self, user_id: int, email: str, tg_username: str, source: Optional[str]) -> int:
+        """Добавляем новую заявку"""
+        def _insert():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            now = int(time.time())
+            
+            cur.execute("""
+                INSERT INTO submissions(user_id, email, tg_username, source, status, created_at) 
+                VALUES (?, ?, ?, ?, 'pending', ?)
+            """, (user_id, email, tg_username, source, now))
+            
+            submission_id = cur.lastrowid
+            conn.commit()
+            conn.close()
+            return submission_id
+            
+        return await asyncio.get_event_loop().run_in_executor(None, _insert)
+
+    async def update_submission_status(self, submission_id: int, status: str) -> None:
+        """Обновляем статус заявки"""
+        def _update():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            
+            cur.execute("""
+                UPDATE submissions SET status = ? WHERE id = ?
+            """, (status, submission_id))
+            
+            conn.commit()
+            conn.close()
+            
+        await asyncio.get_event_loop().run_in_executor(None, _update)
+
+    async def get_latest_pending_submission_by_user(self, user_id: int):
+        """Получаем последнюю pending заявку пользователя"""
+        def _get():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT * FROM submissions 
+                WHERE user_id = ? AND status = 'pending' 
+                ORDER BY created_at DESC LIMIT 1
+            """, (user_id,))
+            
+            # Get column names
+            columns = [description[0] for description in cur.description]
+            row = cur.fetchone()
+            conn.close()
+            if row:
+                # Convert tuple to dict-like object
+                return dict(zip(columns, row))
+            return None
+            
+        return await asyncio.get_event_loop().run_in_executor(None, _get)
+
+    async def get_submission_by_id(self, submission_id: int):
+        """Получаем заявку по ID"""
+        def _get():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            
+            cur.execute("""
+                SELECT * FROM submissions WHERE id = ?
+            """, (submission_id,))
+            
+            # Get column names
+            columns = [description[0] for description in cur.description]
+            row = cur.fetchone()
+            conn.close()
+            if row:
+                # Convert tuple to dict-like object
+                return dict(zip(columns, row))
+            return None
+            
+        return await asyncio.get_event_loop().run_in_executor(None, _get)

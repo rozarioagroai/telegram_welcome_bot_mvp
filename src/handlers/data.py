@@ -1,7 +1,7 @@
 import logging
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.ext import ContextTypes
-from ..db import Database
+from ..db_sqlite import Database
 from ..logging_setup import event_log
 from ..utils.parse import extract_email_and_username
 from ..config import settings

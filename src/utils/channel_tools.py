@@ -2,7 +2,7 @@ import argparse
 import asyncio
 from telegram import Bot
 from ..config import settings
-from ..db import Database
+from ..db_sqlite import Database
 
 async def resolve_and_store_channel_id(channel_username: str) -> int:
     bot = Bot(token=settings.BOT_TOKEN)

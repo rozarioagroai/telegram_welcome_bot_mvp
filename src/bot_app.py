@@ -8,7 +8,7 @@ import logging
 from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
 from .config import settings
 from .logging_setup import setup_logging
-from .db import Database
+from .db_sqlite import Database
 from .handlers.start import start_handler
 from .handlers.access import getaccess_handler
 from .handlers.help import help_handler
