@@ -173,6 +173,11 @@ class Database:
             
         return await asyncio.get_event_loop().run_in_executor(None, _check)
 
+    async def has_valid_captcha(self, user_id: int) -> bool:
+        """Проверяем есть ли валидная капча"""
+        last_start = await self.get_last_event_time(user_id, "start")
+        return await self.user_has_event_after(user_id, "captcha_ok", last_start)
+
     async def set_user_source(self, user_id: int, source: str) -> None:
         """Устанавливаем источник пользователя"""
         def _set_source():
