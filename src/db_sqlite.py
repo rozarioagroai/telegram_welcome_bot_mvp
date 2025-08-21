@@ -231,6 +231,23 @@ class Database:
             
         await asyncio.get_event_loop().run_in_executor(None, _set)
 
+    async def save_invite(self, user_id: int, link: str, expire_at: int) -> None:
+        """Сохраняем приглашение"""
+        def _save():
+            conn = sqlite3.connect(self.db_path)
+            cur = conn.cursor()
+            now = int(time.time())
+            
+            cur.execute("""
+                INSERT INTO invites(user_id, link, expire_at, created_at) 
+                VALUES (?, ?, ?, ?)
+            """, (user_id, link, expire_at, now))
+            
+            conn.commit()
+            conn.close()
+            
+        await asyncio.get_event_loop().run_in_executor(None, _save)
+
     async def insert_submission(self, user_id: int, email: str, tg_username: str, source: Optional[str]) -> int:
         """Добавляем новую заявку"""
         def _insert():
