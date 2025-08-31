@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 
 # Устанавливаем путь к проекту
-project_path = Path("/home/yourusername/tg_welcome_bot")  # Замените yourusername на ваш username
+project_path = Path("/home/JohnBill/telegram_welcome_bot_mvp")  # Путь к клонированному репозиторию
 sys.path.insert(0, str(project_path))
 sys.path.insert(0, str(project_path / "src"))
 
