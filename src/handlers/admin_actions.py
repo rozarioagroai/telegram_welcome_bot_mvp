@@ -37,10 +37,20 @@ async def _resolve_channel_id(db: Database) -> int | None:
 async def admin_approve_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     cq = update.callback_query
     admin_id = update.effective_user.id
-    await cq.answer()
+    
+    # Безопасно отвечаем на callback query
+    try:
+        await cq.answer()
+    except Exception as e:
+        logger.warning(f"Failed to answer callback query: {e}")
+        # Продолжаем выполнение даже если не удалось ответить
 
     if not _is_admin(admin_id):
-        await cq.edit_message_text("Not allowed.")
+        try:
+            await cq.edit_message_text("Not allowed.")
+        except Exception:
+            # Если не удалось отредактировать, отправляем новое сообщение
+            await context.bot.send_message(chat_id=admin_id, text="Not allowed.")
         return
 
     # parse submission_id
@@ -77,18 +87,36 @@ async def admin_approve_handler(update: Update, context: ContextTypes.DEFAULT_TY
         await context.bot.send_message(chat_id=user_id, text=APPROVED_TEXT.format(link=link))
         await db.update_submission_status(submission_id, "approved")
         await db.add_event(user_id=user_id, event_type="manual_approved", source=sub["source"])
-        await cq.edit_message_text(f"Approved and invited user {user_id}.")
+        
+        # Безопасно редактируем сообщение
+        try:
+            await cq.edit_message_text(f"Approved and invited user {user_id}.")
+        except Exception:
+            await context.bot.send_message(chat_id=admin_id, text=f"✅ Approved and invited user {user_id}.")
+            
     except TelegramError as e:
         logger.exception("Invite creation/send failed")
-        await cq.edit_message_text(f"Failed to invite: {e!r}")
+        try:
+            await cq.edit_message_text(f"Failed to invite: {e!r}")
+        except Exception:
+            await context.bot.send_message(chat_id=admin_id, text=f"❌ Failed to invite: {e!r}")
 
 async def admin_deny_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     cq = update.callback_query
     admin_id = update.effective_user.id
-    await cq.answer()
+    
+    # Безопасно отвечаем на callback query
+    try:
+        await cq.answer()
+    except Exception as e:
+        logger.warning(f"Failed to answer callback query: {e}")
+        # Продолжаем выполнение даже если не удалось ответить
 
     if not _is_admin(admin_id):
-        await cq.edit_message_text("Not allowed.")
+        try:
+            await cq.edit_message_text("Not allowed.")
+        except Exception:
+            await context.bot.send_message(chat_id=admin_id, text="Not allowed.")
         return
 
     try:
@@ -113,4 +141,9 @@ async def admin_deny_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
     await context.bot.send_message(chat_id=user_id, text=DENIED_TEXT, reply_markup=kb)
     await db.update_submission_status(submission_id, "denied")
     await db.add_event(user_id=user_id, event_type="manual_denied", source=sub["source"])
-    await cq.edit_message_text(f"Denied user {user_id}.")
+    
+    # Безопасно редактируем сообщение
+    try:
+        await cq.edit_message_text(f"Denied user {user_id}.")
+    except Exception:
+        await context.bot.send_message(chat_id=admin_id, text=f"❌ Denied user {user_id}.")

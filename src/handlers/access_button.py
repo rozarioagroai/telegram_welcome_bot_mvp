@@ -33,11 +33,21 @@ async def start_access_handler(update: Update, context: ContextTypes.DEFAULT_TYP
     deadline = int(time.time()) + settings.CAPTCHA_TTL_SECONDS
     captcha_deadlines[user_id] = deadline
 
-    # Отвечаем на callback query
-    await update.callback_query.answer()
+    # Безопасно отвечаем на callback query
+    try:
+        await update.callback_query.answer()
+    except Exception as e:
+        logger.warning(f"Failed to answer callback query: {e}")
 
-    # Отправляем сообщение с капчей
-    await update.callback_query.edit_message_text(
-        "Please confirm you are human within 60 seconds.",
-        reply_markup=human_button(),
-    )
+    # Безопасно отправляем сообщение с капчей
+    try:
+        await update.callback_query.edit_message_text(
+            "Please confirm you are human within 60 seconds.",
+            reply_markup=human_button(),
+        )
+    except Exception:
+        await context.bot.send_message(
+            chat_id=user_id,
+            text="Please confirm you are human within 60 seconds.",
+            reply_markup=human_button(),
+        )

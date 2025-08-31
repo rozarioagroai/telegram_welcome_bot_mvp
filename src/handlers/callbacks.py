@@ -43,7 +43,10 @@ async def captcha_ok_handler(update: Update, context: ContextTypes.DEFAULT_TYPE)
             await update.callback_query.edit_message_text("Time’s up. Send /start again.")
         except Exception:
             pass
-        await update.callback_query.answer()
+        try:
+            await update.callback_query.answer()
+        except Exception as e:
+            logger.warning(f"Failed to answer callback query: {e}")
         return
 
     await db.add_event(user_id=user_id, event_type="captcha_ok", source=source)
